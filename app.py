@@ -2,25 +2,22 @@ import streamlit as st
 import re
 import math
 
-# ----- Calcolo dei prezzi -----
-
+# -----------------------------
+# Funzioni per calcolo prezzi
+# -----------------------------
 def arrotonda_intero_con_00(valore: float) -> str:
-    """Arrotonda all'intero e aggiunge ',00'."""
     intero = int(math.floor(valore + 0.5))
     return f"{intero},00"
 
 def arrotonda_intero_senza_00(valore: float) -> str:
-    """Arrotonda all'intero senza decimali."""
     intero = int(math.floor(valore + 0.5))
     return f"{intero}"
 
 def arrotonda_due_decimali(valore: float) -> str:
-    """Arrotonda a due decimali, con virgola."""
     dec = math.floor(valore * 100 + 0.5) / 100
     return f"{dec:.2f}".replace('.', ',')
 
 def elabora_prezzo(match, percentuale: float, formato: str) -> str:
-    """Converte un prezzo '€ 577,00' con la percentuale scelta, arrotondando."""
     testo_originale = match.group(0)
     prezzo_str = testo_originale.replace('€', '').strip().replace(' ', '')
     normalizzato = prezzo_str.replace(',', '.')
@@ -40,145 +37,137 @@ def elabora_prezzo(match, percentuale: float, formato: str) -> str:
     return f"€ {finale}"
 
 def applica_percentuale_testo(testo: str, percentuale: float, formato: str) -> str:
-    """Applica la variazione ai prezzi '€ XXX,XX' o '€XXX.XX' all'interno del testo."""
     pattern = re.compile(r"€\s*[0-9\s]+[.,][0-9]{2}")
     return pattern.sub(lambda m: elabora_prezzo(m, percentuale, formato), testo)
 
-# ----- Configurazione pagina e tema -----
+# ------------------------------------------------
+# Configurazione pagina e layout
+# ------------------------------------------------
 st.set_page_config(
     page_title="Strumento Online di Variazione dei Prezzi",
     page_icon="💶",
     layout="centered"
 )
 
-# CSS personalizzato per tema scuro con accenti colorati
+# ------------------------------------------------
+# CSS personalizzato per un look più colorato
+# ------------------------------------------------
 st.markdown("""
 <style>
-/* Sfondo scuro con gradiente */
+/* Sfondo a gradiente multi-colore */
 body {
-    background: linear-gradient(160deg, #14213d 0%, #1d2a4a 100%) !important;
+    background: linear-gradient(130deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%) !important;
     color: #e0e0e0 !important;
+    font-family: "Segoe UI", sans-serif !important;
 }
-/* Colore principale (verde/blu) */
-.btn-main-color {
-    background-color: #18a999 !important;
-    border-color: #18a999 !important;
-    color: white !important;
-    font-weight: bold !important;
-    padding: 0.6rem 1.2rem !important;
+
+/* Card container dei vari elementi */
+main .block-container {
+    max-width: 750px !important;
+    padding: 2rem !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3) !important;
+}
+
+/* Titoli */
+h1, h2, h3, h4 {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Sottotitoli e testo */
+p, div, label {
+    color: #eeeeee !important;
+}
+
+/* Pulsanti generici */
+button, .stButton button {
+    background-color: #1EB980 !important;
+    border: none !important;
     border-radius: 8px !important;
+    color: #ffffff !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 1.2rem !important;
     margin: 0.3rem !important;
 }
-.btn-main-color:hover {
-    background-color: #159c8c !important;
-    border-color: #159c8c !important;
+button:hover, .stButton button:hover {
+    background-color: #17a07a !important;
+    border: none !important;
 }
 
-/* Titolo */
-h1, h2, h3, h4 {
-    color: #f4f4f4 !important;
+/* File Uploader e spazi */
+.stFileUploader {
+    background-color: rgba(255,255,255,0.1) !important;
+    border: 1px solid #ffffff44 !important;
+    border-radius: 8px !important;
 }
 
-/* Caselle di testo e aree di testo */
-section > div:not(.element-container) > div.stTextArea, .stTextInput {
-    background-color: #22314b !important;
-    color: #ffffff !important;
-    border: 1px solid #18a999 !important;
+/* Aree di testo e input scuri */
+textarea, .stTextArea, .stTextInput, .stNumberInput input {
+    background-color: #242424 !important;
+    color: #fefefe !important;
+    border: 1px solid #e6e6e6 !important;
     border-radius: 6px !important;
 }
 
-/* Selettori radio, number input e file uploader */
-.stRadio > label, .stNumberInput > label, .stFileUploader > label {
-    color: #d2d2d2 !important;
+/* Radio e label */
+.stRadio > label, .stRadio div[data-baseweb="radio"] > div {
+    color: #fff !important;
     font-weight: 500 !important;
 }
-.stRadio div[data-baseweb="radio"] > div {
-    color: #ffffff !important;
-}
-.css-19nf2c5.e1xhbmpj2 {  /* label di radio */
-    color: #ffffff !important;
-}
-.css-eh5xgm { /* number input */
-    background-color: #22314b !important;
-    border: 1px solid #18a999 !important;
-    color: #ffffff !important;
-}
-/* ComboBox / select (Streamlit < 1.23 non lo ha di default, 
-   ma in st.radio puoi avere st.selectbox) */
 
-/* Pulsanti (versioni base) */
-.css-1cxtc89.e8zbici2 {
-    background-color: #18a999 !important;
-    border-color: #18a999 !important;
-    border-radius: 8px !important;
-    font-weight: bold !important;
-}
-.css-1cxtc89.e8zbici2:hover {
-    background-color: #159c8c !important;
-    border-color: #159c8c !important;
-}
-/* TextArea scuro */
-textarea {
-    background-color: #1d2a4a !important;
-    color: #ffffff !important;
-    border: 1px solid #18a999 !important;
-    border-radius: 6px !important;
-}
-
-/* Riduce la larghezza massima dei container per layout centrato */
-main .block-container {
-    max-width: 700px !important;
-    margin: auto !important;
-    padding-top: 2rem !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
-# ----- Titolo -----
-st.title("💻 Strumento Online di Variazione dei Prezzi (Dark Edition)")
-
+# ------------------------------------------------
+# Titolo e descrizione
+# ------------------------------------------------
+st.title("🎨 Strumento Online di Variazione dei Prezzi (Ultra Color Edition)")
 st.markdown("""
-**Carica un file di testo** (da Desktop o altrove) che contiene prezzi in formato “€ 577,00”, 
-oppure incolla il tuo testo manualmente.  
-Poi imposta la **variazione percentuale** e scegli il **formato** desiderato.
+Benvenuto! Carica un **file di testo** (che contenga prezzi nel formato "€ 577,00") o **incolla manualmente** il testo nel riquadro apposito.  
+Imposta la **variazione percentuale** (anche negativa, es. -5) e **seleziona il formato** di arrotondamento. Quindi, **clicca** su "Applica Variazione" per vedere il risultato.
 """)
 
-# ----- Scelta caricamento file / testo manuale -----
+# ------------------------------------------------
+# Layout: file uploader e testo incollato
+# ------------------------------------------------
+st.subheader("1. Carica File di Testo oppure incolla manualmente")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Carica File di Testo")
-    file_txt = st.file_uploader("Seleziona un file .txt", type=["txt"])
+    file_txt = st.file_uploader("Scegli un file .txt", type=["txt"])
 
 with col2:
-    st.subheader("Oppure incolla manualmente:")
-    testo_incollato = st.text_area("Testo Originale", height=200)
+    testo_incollato = st.text_area("Oppure incolla qui il testo:", height=200)
 
-# Determina il testo originale (o dal file o dall’area)
 testo_originale = ""
 if file_txt is not None:
     testo_originale = file_txt.read().decode("utf-8", errors="ignore")
 elif testo_incollato.strip():
     testo_originale = testo_incollato
 
-# ----- Configurazione parametri -----
-st.subheader("Impostazioni di Variazione")
-
-percentuale = st.number_input(
-    "Variazione Percentuale (%)",
-    value=2.0, step=0.1, format="%.2f"
-)
+# ------------------------------------------------
+# Parametri di variazione
+# ------------------------------------------------
+st.subheader("2. Imposta la Variazione e Formato")
+percentuale = st.number_input("Variazione Percentuale (%)", value=2.0, step=0.1, format="%.2f")
 
 formato_opzioni = ["Intero con ,00", "Intero senza ,00", "Due decimali"]
-formato = st.radio("Formato Prezzo", formato_opzioni)
+formato = st.radio("Seleziona Formato Prezzo:", formato_opzioni)
 
-# ----- Applica variazione -----
-if st.button("🚀 Applica Variazione", key="apply_button"):
+# ------------------------------------------------
+# Applica la modifica
+# ------------------------------------------------
+st.subheader("3. Applica e Visualizza il Risultato")
+if st.button("⚡ Applica Variazione"):
     if not testo_originale.strip():
-        st.error("Nessun testo da elaborare. Carica un file o incolla manualmente.")
+        st.error("Non hai fornito alcun testo da elaborare. Carica un file o incolla manualmente!")
     else:
-        risultato = applica_percentuale_testo(testo_originale, percentuale, formato)
-        st.subheader("Testo Modificato")
-        st.text_area("Risultato:", value=risultato, height=300)
+        testo_modificato = applica_percentuale_testo(testo_originale, percentuale, formato)
+        st.success("Ecco il testo modificato:")
+        st.text_area("Risultato:", value=testo_modificato, height=300)
 
-st.info("© 2023 - Esempio tool web con tema scuro, Streamlit e variazione prezzi.")
+st.markdown("<hr style='border-top: 2px solid #fff; margin: 2rem 0;'/>", unsafe_allow_html=True)
+st.info("© 2023 - Demo con tema multicolore. Realizzato con ❤️ e Streamlit.")
